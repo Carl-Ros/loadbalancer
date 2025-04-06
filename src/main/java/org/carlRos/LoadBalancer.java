@@ -5,11 +5,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LoadBalancer {
     private final ServerSocket server;
     private final List<InetSocketAddress> serverAddresses;
-    private int nextServerIndex = 0;
+    private final AtomicInteger nextServerIndex = new AtomicInteger(0);
 
     public LoadBalancer(int port, List<InetSocketAddress> serverAddresses) throws IOException {
         server = new ServerSocket(port);
@@ -17,10 +18,9 @@ public class LoadBalancer {
         start();
     }
 
-    private synchronized InetSocketAddress roundRobin() {
-        var nextServerAddress = serverAddresses.get(nextServerIndex);
-        nextServerIndex = (nextServerIndex + 1) % serverAddresses.size();
-        return nextServerAddress;
+    private InetSocketAddress roundRobin() {
+        int index = nextServerIndex.getAndUpdate(i -> (i + 1) % serverAddresses.size());
+        return serverAddresses.get(index);
     }
 
     private void loadBalance(Socket clientSocket) throws IOException {
