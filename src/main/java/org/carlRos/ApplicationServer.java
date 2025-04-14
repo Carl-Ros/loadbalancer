@@ -28,7 +28,7 @@ public class ApplicationServer {
     private String OkHttpStringResponse(String message) {
         return "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/plain\r\n" +
-                "Content-Length: " + message.length() + "\r\n" +
+                "Content-Length: " + message.getBytes(StandardCharsets.UTF_8).length + "\r\n" +
                 "\r\n" +
                 message;
     }
